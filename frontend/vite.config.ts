@@ -5,7 +5,6 @@ import { wrapperEnv } from './src/utils/get-env';
 import { visualizer } from 'rollup-plugin-visualizer';
 import viteCompression from 'vite-plugin-compression';
 import VueSetupExtend from 'vite-plugin-vue-setup-extend';
-import eslintPlugin from 'vite-plugin-eslint';
 import vueJsx from '@vitejs/plugin-vue-jsx';
 import DefineOptions from 'unplugin-vue-define-options/vite';
 
@@ -50,9 +49,6 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
         plugins: [
             vue(),
             DefineOptions(),
-            eslintPlugin({
-                exclude: ['**/*.js'],
-            }),
             vueJsx(),
             VueSetupExtend(),
             viteEnv.VITE_REPORT && visualizer(),

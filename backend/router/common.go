@@ -22,6 +22,7 @@ func commonGroups() []CommonRouter {
 		&NginxRouter{},
 		&RuntimeRouter{},
 		&ProcessRouter{},
+		&JarRouter{},
 		&WebsiteCARouter{},
 	}
 }
