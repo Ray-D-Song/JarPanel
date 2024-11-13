@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/1Panel-dev/1Panel/backend/global"
+	"github.com/google/uuid"
 )
 
 type JarService struct {
@@ -24,31 +25,22 @@ func NewJarService() *JarService {
 
 var jarDir = filepath.Join(global.CONF.System.BaseDir, "uploads", "jars")
 
-func (s *JarService) Upload(file *multipart.FileHeader) error {
-	// 使用 os.Stat 检查文件在服务器上是否存在
-	if _, err := os.Stat(filepath.Join(jarDir, file.Filename)); err == nil {
-		return fmt.Errorf("jar包 %s 已存在", file.Filename)
-	}
-
-	// 创建上传目录
-	if err := os.MkdirAll(jarDir, 0755); err != nil {
-		return err
-	}
-
-	// 保存文件
-	dst := filepath.Join(jarDir, file.Filename)
+func (s *JarService) Upload(file *multipart.FileHeader) (string, error) {
+	// 将 jar 包重命名为 uuid.jar
+	fileName := fmt.Sprintf("%s.jar", uuid.New().String())
+	dst := filepath.Join(jarDir, fileName)
 	src, err := file.Open()
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer src.Close()
 
 	out, err := os.Create(dst)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer out.Close()
 
 	_, err = io.Copy(out, src)
-	return err
+	return fileName, err
 }

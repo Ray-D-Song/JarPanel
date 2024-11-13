@@ -69,7 +69,8 @@ func (b *BaseApi) UploadJar(c *gin.Context) {
 	}
 
 	jarService := service.NewJarService()
-	if err := jarService.Upload(file); err != nil {
+	fileName, err := jarService.Upload(file)
+	if err != nil {
 		helper.ErrorWithDetail(c, constant.CodeErrInternalServer, constant.ErrTypeInternalServer, err)
 		return
 	}
@@ -92,7 +93,7 @@ func (b *BaseApi) UploadJar(c *gin.Context) {
 	recordData = append(recordData, JarRecord{
 		Id:         uuid.New().String(),
 		Name:       name,
-		FileName:   file.Filename,
+		FileName:   fileName,
 		CreateTime: time.Now().Format("2006-01-02 15:04:05"),
 	})
 
@@ -141,12 +142,24 @@ func (b *BaseApi) StartJar(c *gin.Context) {
 	// 找到对应的jar包
 	for _, record := range recordData {
 		if record.Id == id {
-			// 启动jar包
+			// 修改启动命令，将输出重定向到日志文件
+			logFile := filepath.Join(jarDir, record.FileName+".log")
 			cmd := exec.Command("java", "-jar", filepath.Join(jarDir, record.FileName))
-			if err := cmd.Run(); err != nil {
+			cmd.Stdout, _ = os.Create(logFile)
+			cmd.Stderr = cmd.Stdout
+
+			// 以后台方式启动进程
+			if err := cmd.Start(); err != nil {
 				helper.ErrorWithDetail(c, constant.CodeErrInternalServer, constant.ErrTypeInternalServer, err)
 				return
 			}
+
+			// 将进程解绑，使其在后台独立运行
+			if err := cmd.Process.Release(); err != nil {
+				helper.ErrorWithDetail(c, constant.CodeErrInternalServer, constant.ErrTypeInternalServer, err)
+				return
+			}
+			break
 		}
 	}
 
@@ -181,15 +194,47 @@ func (b *BaseApi) StopJar(c *gin.Context) {
 		helper.ErrorWithDetail(c, constant.CodeErrInternalServer, constant.ErrTypeInternalServer, err)
 		return
 	}
-	// 找到对应的jar包
 	for _, record := range recordData {
 		if record.Id == id {
-			// 停止jar包
-			cmd := exec.Command("kill", "-9", record.Name)
-			if err := cmd.Run(); err != nil {
+			// 使用 jps -l获取所有 java 进程
+			cmd := exec.Command("jps", "-l")
+			output, err := cmd.Output()
+			if err != nil {
 				helper.ErrorWithDetail(c, constant.CodeErrInternalServer, constant.ErrTypeInternalServer, err)
 				return
 			}
+
+			// 在输出中查找对应的 jar 包进程
+			lines := strings.Split(string(output), "\n")
+			for _, line := range lines {
+				if strings.Contains(line, record.FileName) {
+					// 提取 PID
+					pid := strings.Split(line, " ")[0]
+					// 先尝试优雅停止
+					killCmd := exec.Command("kill", pid)
+					if err := killCmd.Run(); err != nil {
+						// 如果优雅停止失败,再强制终止
+						killCmd = exec.Command("kill", "-9", pid)
+						if err := killCmd.Run(); err != nil {
+							helper.ErrorWithDetail(c, constant.CodeErrInternalServer, constant.ErrTypeInternalServer, err)
+							return
+						}
+					}
+					// 等待进程终止
+					maxRetries := 5
+					for i := 0; i < maxRetries; i++ {
+						// 检查进程是否还在运行
+						checkCmd := exec.Command("kill", "-0", pid)
+						if err := checkCmd.Run(); err != nil {
+							// 进程已终止
+							break
+						}
+						time.Sleep(time.Second)
+					}
+					break
+				}
+			}
+			break
 		}
 	}
 
@@ -225,15 +270,20 @@ func (b *BaseApi) DeleteJar(c *gin.Context) {
 		return
 	}
 
-	// 删除对应的jar包
-	for _, record := range recordData {
+	// 修改 record.json, 无需删除 jar 包
+	for i, record := range recordData {
 		if record.Id == id {
-			os.Remove(filepath.Join(jarDir, record.FileName))
+			recordData = append(recordData[:i], recordData[i+1:]...)
+			break
 		}
 	}
 
-	// 写入 record.json 文件
-	if _, err := json.Marshal(recordData); err != nil {
+	recordBytes, err := json.Marshal(recordData)
+	if err != nil {
+		helper.ErrorWithDetail(c, constant.CodeErrInternalServer, constant.ErrTypeInternalServer, err)
+		return
+	}
+	if err := os.WriteFile(filepath.Join(jarDir, "record.json"), recordBytes, 0644); err != nil {
 		helper.ErrorWithDetail(c, constant.CodeErrInternalServer, constant.ErrTypeInternalServer, err)
 		return
 	}
@@ -271,17 +321,19 @@ func (b *BaseApi) GetJarStatus(c *gin.Context) {
 		return
 	}
 
-	cmd := exec.Command("ps", "-ef")
+	// 使用 jps -l 获取所有java进程
+	cmd := exec.Command("jps", "-l")
 	output, err := cmd.Output()
 	if err != nil {
 		helper.ErrorWithDetail(c, constant.CodeErrInternalServer, constant.ErrTypeInternalServer, err)
 		return
 	}
+	os.WriteFile(filepath.Join(jarDir, "dev.log"), output, 0644)
 
 	// 遍历recordData，检查每个jar包是否在运行, 返回Record + Running状态
 	var statuses []JarStatus
 	for _, record := range recordData {
-		if strings.Contains(string(output), record.Name) {
+		if strings.Contains(string(output), record.FileName) {
 			statuses = append(statuses, JarStatus{Id: record.Id, Name: record.Name, FileName: record.FileName, CreateTime: record.CreateTime, Status: "running"})
 		} else {
 			statuses = append(statuses, JarStatus{Id: record.Id, Name: record.Name, FileName: record.FileName, CreateTime: record.CreateTime, Status: "stopped"})

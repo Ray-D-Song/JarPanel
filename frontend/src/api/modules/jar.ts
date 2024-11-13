@@ -12,7 +12,7 @@ export const getJarStatus = () => {
  * @param id JAR 包 ID
  */
 export const deleteJar = (id: string) => {
-  return http.delete<void>(`/jar/${id}`)
+  return http.delete<void>(`/jar/delete?id=${id}`)
 }
 
 /**
@@ -20,7 +20,7 @@ export const deleteJar = (id: string) => {
  * @param id JAR 包 ID
  */
 export const startJar = (id: string) => {
-  return http.post<void>(`/jar/${id}/start`)
+  return http.put<void>(`/jar/start?id=${id}`)
 }
 
 /**

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getJarStatus, stopJar } from '@/api/modules/jar'
+import { getJarStatus, stopJar, startJar, deleteJar } from '@/api/modules/jar'
 
 interface JarItem {
   id: string
@@ -18,8 +18,8 @@ onMounted(() => {
     timer = setInterval(() => {
         getJarStatus().then((res) => {
             const {code, data} = res
-            if (code === 200 && data) {
-                jarStatus.value = data
+            if (code === 200) {
+                jarStatus.value = data ? data : []
             }
         })
     }, 1000)
@@ -31,12 +31,26 @@ onBeforeUnmount(() => {
 
 // 处理删除操作
 const handleDelete = (row: JarItem) => {
-  ElMessage.success('删除成功')
+    if (row.status === 'running') {
+        return ElMessage.error('请先停止应用再删除')
+    }
+    deleteJar(row.id).then((res) => {
+        const {code} = res
+        if (code === 200) {
+            ElMessage.success('删除成功')
+        }
+    })
 }
 
 // 处理启动操作
 const handleStart = (row: JarItem) => {
-  ElMessage.success('启动成功')
+    startJar(row.id).then((res) => {
+        const {code} = res
+        if (code === 200) {
+            return ElMessage.success('启动成功')
+        }
+        return ElMessage.error(res.message || '启动失败')
+    })
 }
 
 // 处理停止操作
@@ -145,7 +159,7 @@ const handleUploadConfirm = async () => {
             type="danger" 
             size="small" 
             @click="handleDelete(row)"
-            v-if="row.status !== 'stopped'"
+            v-if="row.status === 'stopped'"
           >
             删除
           </el-button>
