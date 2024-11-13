@@ -1,9 +1,9 @@
 <template>
-    <div>
-        <FireRouter />
+  <div>
+    <FireRouter />
 
-        <Log />
-    </div>
+    <Log />
+  </div>
 </template>
 
 <script setup lang="ts">

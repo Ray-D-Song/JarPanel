@@ -1,13 +1,11 @@
 @font-face {
-  font-family: "panel"; /* Project id 3575356 */
-  src: url('iconfont.woff2?t=1724290117056') format('woff2'),
-       url('iconfont.woff?t=1724290117056') format('woff'),
-       url('iconfont.ttf?t=1724290117056') format('truetype'),
-       url('iconfont.svg?t=1724290117056#panel') format('svg');
+  font-family: 'panel'; /* Project id 3575356 */
+  src: url('iconfont.woff2?t=1724290117056') format('woff2'), url('iconfont.woff?t=1724290117056') format('woff'),
+    url('iconfont.ttf?t=1724290117056') format('truetype'), url('iconfont.svg?t=1724290117056#panel') format('svg');
 }
 
 .panel {
-  font-family: "panel" !important;
+  font-family: 'panel' !important;
   font-size: 16px;
   font-style: normal;
   -webkit-font-smoothing: antialiased;
@@ -15,386 +13,385 @@
 }
 
 .p-alert-1:before {
-  content: "\e611";
+  content: '\e611';
 }
 
 .p-alert-2:before {
-  content: "\e701";
+  content: '\e701';
 }
 
 .p-aws:before {
-  content: "\e600";
+  content: '\e600';
 }
 
 .p-tengxunyun1:before {
-  content: "\e651";
+  content: '\e651';
 }
 
 .p-qiniuyun:before {
-  content: "\e62c";
+  content: '\e62c';
 }
 
 .p-minio:before {
-  content: "\e63c";
+  content: '\e63c';
 }
 
 .p-onedrive:before {
-  content: "\e601";
+  content: '\e601';
 }
 
 .p-oss:before {
-  content: "\e607";
+  content: '\e607';
 }
 
 .p-SFTP:before {
-  content: "\e647";
+  content: '\e647';
 }
 
 .p-webdav:before {
-  content: "\e622";
+  content: '\e622';
 }
 
 .p-zhongduan:before {
-  content: "\e731";
+  content: '\e731';
 }
 
 .p-docker1:before {
-  content: "\e76a";
+  content: '\e76a';
 }
 
 .p-Firefox:before {
-  content: "\e87c";
+  content: '\e87c';
 }
 
 .p-m-ios:before {
-  content: "\e60e";
+  content: '\e60e';
 }
 
 .p-m-pc:before {
-  content: "\e771";
+  content: '\e771';
 }
 
 .p-m-theworld:before {
-  content: "\e947";
+  content: '\e947';
 }
 
 .p-m-android:before {
-  content: "\e9e0";
+  content: '\e9e0';
 }
 
 .p-m-tencent:before {
-  content: "\e609";
+  content: '\e609';
 }
 
 .p-m-windows:before {
-  content: "\e6a0";
+  content: '\e6a0';
 }
 
 .p-m-machine:before {
-  content: "\e862";
+  content: '\e862';
 }
 
 .p-m-mobile:before {
-  content: "\e620";
+  content: '\e620';
 }
 
 .p-m-ucweb:before {
-  content: "\e603";
+  content: '\e603';
 }
 
 .p-m-edge:before {
-  content: "\e8e2";
+  content: '\e8e2';
 }
 
 .p-m-2345explorer:before {
-  content: "\e60a";
+  content: '\e60a';
 }
 
 .p-m-chrome:before {
-  content: "\ea09";
+  content: '\ea09';
 }
 
 .p-m-opera:before {
-  content: "\ea0e";
+  content: '\ea0e';
 }
 
 .p-m-linux:before {
-  content: "\e80b";
+  content: '\e80b';
 }
 
 .p-m-maxthon:before {
-  content: "\e676";
+  content: '\e676';
 }
 
 .p-m-mac:before {
-  content: "\ef2d";
+  content: '\ef2d';
 }
 
 .p-m-ie:before {
-  content: "\eaab";
+  content: '\eaab';
 }
 
 .p-Chrome-OS:before {
-  content: "\e60b";
+  content: '\e60b';
 }
 
 .p-m-safari:before {
-  content: "\e60c";
+  content: '\e60c';
 }
 
 .p-m-360se:before {
-  content: "\e678";
+  content: '\e678';
 }
 
 .p-monitor-1:before {
-  content: "\e60d";
+  content: '\e60d';
 }
 
 .p-xpack:before {
-  content: "\e604";
+  content: '\e604';
 }
 
 .p-gpu-2:before {
-  content: "\e6d8";
+  content: '\e6d8';
 }
 
 .p-gpu-1:before {
-  content: "\e623";
+  content: '\e623';
 }
 
 .p-monitor-4:before {
-  content: "\ec4e";
+  content: '\ec4e';
 }
 
 .p-waf-4:before {
-  content: "\e608";
+  content: '\e608';
 }
 
 .p-waf-1:before {
-  content: "\e62a";
+  content: '\e62a';
 }
 
 .p-waf-2:before {
-  content: "\e682";
+  content: '\e682';
 }
 
 .p-waf-3:before {
-  content: "\e666";
+  content: '\e666';
 }
 
 .p-monitor-2:before {
-  content: "\ec4f";
+  content: '\ec4f';
 }
 
 .p-setting-1:before {
-  content: "\e626";
+  content: '\e626';
 }
 
 .p-setting-2:before {
-  content: "\e630";
+  content: '\e630';
 }
 
 .p-setting-3:before {
-  content: "\e617";
+  content: '\e617';
 }
 
 .p-tamper-4:before {
-  content: "\e7c3";
+  content: '\e7c3';
 }
 
 .p-tamper-2:before {
-  content: "\e610";
+  content: '\e610';
 }
 
 .p-tamper-3:before {
-  content: "\ec4d";
+  content: '\ec4d';
 }
 
 .p-tamper-1:before {
-  content: "\e687";
+  content: '\e687';
 }
 
 .p-monitor-3:before {
-  content: "\ec50";
+  content: '\ec50';
 }
 
 .p-tongji:before {
-  content: "\e856";
+  content: '\e856';
 }
 
 .p-xiangqing:before {
-  content: "\e677";
+  content: '\e677';
 }
 
 .p-caidan:before {
-  content: "\e61d";
+  content: '\e61d';
 }
 
 .p-yanzhengma1:before {
-  content: "\e744";
+  content: '\e744';
 }
 
 .p-file-png:before {
-  content: "\e7ae";
+  content: '\e7ae';
 }
 
 .p-file-ppt:before {
-  content: "\e6e2";
+  content: '\e6e2';
 }
 
 .p-file-html:before {
-  content: "\d123";
+  content: '\d123';
 }
 
 .p-file-word:before {
-  content: "\e6e4";
+  content: '\e6e4';
 }
 
 .p-file-excel:before {
-  content: "\e6e6";
+  content: '\e6e6';
 }
 
 .p-file-pdf:before {
-  content: "\e6e7";
+  content: '\e6e7';
 }
 
 .p-file-mp3:before {
-  content: "\e6e8";
+  content: '\e6e8';
 }
 
 .p-file-svg:before {
-  content: "\e6e9";
+  content: '\e6e9';
 }
 
 .p-file-jpg:before {
-  content: "\e6ea";
+  content: '\e6ea';
 }
 
 .p-file-video:before {
-  content: "\e6eb";
+  content: '\e6eb';
 }
 
 .p-star:before {
-  content: "\e60f";
+  content: '\e60f';
 }
 
 .p-taolun:before {
-  content: "\e602";
+  content: '\e602';
 }
 
 .p-bug:before {
-  content: "\e616";
+  content: '\e616';
 }
 
 .p-huaban88:before {
-  content: "\e67c";
+  content: '\e67c';
 }
 
 .p-logout:before {
-  content: "\e8fe";
+  content: '\e8fe';
 }
 
 .p-terminal2:before {
-  content: "\e82a";
+  content: '\e82a';
 }
 
 .p-yingwen:before {
-  content: "\e6c3";
+  content: '\e6c3';
 }
 
 .p-zhongwen:before {
-  content: "\e6c8";
+  content: '\e6c8';
 }
 
 .p-plan:before {
-  content: "\e746";
+  content: '\e746';
 }
 
 .p-database:before {
-  content: "\e754";
+  content: '\e754';
 }
 
 .p-rejected-order:before {
-  content: "\e75e";
+  content: '\e75e';
 }
 
 .p-toolbox:before {
-  content: "\e769";
+  content: '\e769';
 }
 
 .p-website:before {
-  content: "\e781";
+  content: '\e781';
 }
 
 .p-config:before {
-  content: "\e78e";
+  content: '\e78e';
 }
 
 .p-appstore1:before {
-  content: "\e792";
+  content: '\e792';
 }
 
 .p-log:before {
-  content: "\e793";
+  content: '\e793';
 }
 
 .p-host:before {
-  content: "\e7b1";
+  content: '\e7b1';
 }
 
 .p-home:before {
-  content: "\e7c6";
+  content: '\e7c6';
 }
 
 .p-appstore:before {
-  content: "\eb65";
+  content: '\eb65';
 }
 
 .p-docker:before {
-  content: "\e659";
+  content: '\e659';
 }
 
 .p-arrow-right:before {
-  content: "\e665";
+  content: '\e665';
 }
 
 .p-terminal:before {
-  content: "\e864";
+  content: '\e864';
 }
 
 .p-terminal1:before {
-  content: "\e663";
+  content: '\e663';
 }
 
 .p-language:before {
-  content: "\e605";
+  content: '\e605';
 }
 
 .p-theme:before {
-  content: "\e638";
+  content: '\e638';
 }
 
 .p-file-folder:before {
-  content: "\66";
+  content: '\66';
 }
 
 .p-file-unknown:before {
-  content: "\233";
+  content: '\233';
 }
 
 .p-file-txt:before {
-  content: "\74";
+  content: '\74';
 }
 
 .p-file-normal:before {
-  content: "\e7ac";
+  content: '\e7ac';
 }
 
 .p-txt:before {
-  content: "\e6e3";
+  content: '\e6e3';
 }
 
 .p-file-zip:before {
-  content: "\e606";
+  content: '\e606';
 }
-

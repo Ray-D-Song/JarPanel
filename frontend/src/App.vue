@@ -1,7 +1,7 @@
 <template>
-    <el-config-provider :locale="i18nLocale" :button="config" size="default">
-        <router-view v-if="isRouterAlive" />
-    </el-config-provider>
+  <el-config-provider :locale="i18nLocale" :button="config" size="default">
+    <router-view v-if="isRouterAlive" />
+  </el-config-provider>
 </template>
 
 <script setup lang="ts">
@@ -14,22 +14,22 @@ useTheme();
 
 const globalStore = GlobalStore();
 const config = reactive({
-    autoInsertSpace: false,
+  autoInsertSpace: false,
 });
 
 const i18nLocale = computed(() => {
-    if (globalStore.language === 'zh') return zhCn;
-    if (globalStore.language === 'en') return en;
-    return zhCn;
+  if (globalStore.language === 'zh') return zhCn;
+  if (globalStore.language === 'en') return en;
+  return zhCn;
 });
 
 const isRouterAlive = ref(true);
 
 const reload = () => {
-    isRouterAlive.value = false;
-    nextTick(() => {
-        isRouterAlive.value = true;
-    });
+  isRouterAlive.value = false;
+  nextTick(() => {
+    isRouterAlive.value = true;
+  });
 };
 provide('reload', reload);
 </script>

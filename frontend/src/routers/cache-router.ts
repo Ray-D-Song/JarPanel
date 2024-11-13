@@ -9,10 +9,10 @@ import { routerArray } from '@/routers/router';
  * */
 let cacheRouter: RouteRecordName[] = [];
 const filterKeepAlive = (_route: RouteRecordRaw[], _cache: RouteRecordName[]): void => {
-    _route.forEach((item) => {
-        item.meta?.keepAlive && item.name && _cache.push(item.name);
-        item?.children?.length && filterKeepAlive(item.children, _cache);
-    });
+  _route.forEach((item) => {
+    item.meta?.keepAlive && item.name && _cache.push(item.name);
+    item?.children?.length && filterKeepAlive(item.children, _cache);
+  });
 };
 
 filterKeepAlive(routerArray, cacheRouter);

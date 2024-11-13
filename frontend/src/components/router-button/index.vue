@@ -1,25 +1,25 @@
 <template>
-    <el-card class="router_card">
-        <div class="flex w-full flex-col items-center md:justify-between md:flex-row">
-            <el-radio-group v-model="activeName" @change="handleChange">
-                <el-radio-button
-                    class="router_card_button"
-                    :label="button.label"
-                    :value="button.label"
-                    v-for="(button, index) in buttonArray"
-                    size="large"
-                    :key="index"
-                >
-                    <el-badge :value="button.count" v-if="button.count" is-dot>
-                        <span>{{ button.label }}</span>
-                    </el-badge>
-                </el-radio-button>
-            </el-radio-group>
-            <div class="flex flex-row gap-2 md:flex-col lg:flex-row">
-                <slot name="route-button"></slot>
-            </div>
-        </div>
-    </el-card>
+  <el-card class="router_card">
+    <div class="flex w-full flex-col items-center md:justify-between md:flex-row">
+      <el-radio-group v-model="activeName" @change="handleChange">
+        <el-radio-button
+          class="router_card_button"
+          :label="button.label"
+          :value="button.label"
+          v-for="(button, index) in buttonArray"
+          size="large"
+          :key="index"
+        >
+          <el-badge :value="button.count" v-if="button.count" is-dot>
+            <span>{{ button.label }}</span>
+          </el-badge>
+        </el-radio-button>
+      </el-radio-group>
+      <div class="flex flex-row gap-2 md:flex-col lg:flex-row">
+        <slot name="route-button"></slot>
+      </div>
+    </div>
+  </el-card>
 </template>
 
 <script lang="ts" setup>
@@ -29,75 +29,75 @@ import { useRouter } from 'vue-router';
 defineOptions({ name: 'RouterButton' });
 
 const props = defineProps({
-    buttons: {
-        type: Array<RouterButton>,
-        required: true,
-    },
+  buttons: {
+    type: Array<RouterButton>,
+    required: true,
+  },
 });
 
 const buttonArray = computed(() => {
-    return props.buttons;
+  return props.buttons;
 });
 
 const router = useRouter();
 const activeName = ref('');
 const routerToPath = (path: string) => {
-    router.push({ path: path });
+  router.push({ path: path });
 };
 const routerToName = (name: string) => {
-    router.push({ name: name });
+  router.push({ name: name });
 };
 
 const handleChange = (label: string) => {
-    const btn = buttonArray.value.find((btn) => btn.label === label);
-    if (!btn) return;
-    if (btn.path) routerToPath(btn.path);
-    else if (btn.name) routerToName(btn.name);
-    activeName.value = btn.label;
+  const btn = buttonArray.value.find((btn) => btn.label === label);
+  if (!btn) return;
+  if (btn.path) routerToPath(btn.path);
+  else if (btn.name) routerToName(btn.name);
+  activeName.value = btn.label;
 };
 
 onMounted(() => {
-    if (buttonArray.value.length) {
-        let isPathExist = false;
-        const btn = buttonArray.value.find((btn) => {
-            return router.currentRoute.value.path.startsWith(btn.path);
-        });
-        if (btn) {
-            isPathExist = true;
-            activeName.value = btn.label;
-        }
-        if (!isPathExist) {
-            activeName.value = buttonArray.value[0].label;
-        }
+  if (buttonArray.value.length) {
+    let isPathExist = false;
+    const btn = buttonArray.value.find((btn) => {
+      return router.currentRoute.value.path.startsWith(btn.path);
+    });
+    if (btn) {
+      isPathExist = true;
+      activeName.value = btn.label;
     }
+    if (!isPathExist) {
+      activeName.value = buttonArray.value[0].label;
+    }
+  }
 });
 </script>
 
 <style lang="scss">
 .router_card {
-    --el-card-padding: 0;
-    .el-card__body {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
+  --el-card-padding: 0;
+  .el-card__body {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 }
 
 .router_card_button {
-    .el-radio-button__inner {
-        min-width: 100px;
-        height: 100%;
-        background-color: var(--panel-button-active) !important;
-        box-shadow: none !important;
-        border: 2px solid transparent !important;
-        color: var(--el-text-color-regular) !important;
-    }
+  .el-radio-button__inner {
+    min-width: 100px;
+    height: 100%;
+    background-color: var(--panel-button-active) !important;
+    box-shadow: none !important;
+    border: 2px solid transparent !important;
+    color: var(--el-text-color-regular) !important;
+  }
 
-    .el-radio-button__original-radio:checked + .el-radio-button__inner {
-        color: var(--panel-button-text-color) !important;
-        background-color: var(--panel-button-bg-color) !important;
-        border-color: var(--panel-button-active) !important;
-        border-radius: 4px;
-    }
+  .el-radio-button__original-radio:checked + .el-radio-button__inner {
+    color: var(--panel-button-text-color) !important;
+    background-color: var(--panel-button-bg-color) !important;
+    border-color: var(--panel-button-active) !important;
+    border-radius: 4px;
+  }
 }
 </style>

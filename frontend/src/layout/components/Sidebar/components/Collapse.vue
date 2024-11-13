@@ -1,9 +1,9 @@
 <template>
-    <div class="menu-collapse">
-        <el-icon class="collapse-icon" :size="25" @click="menuStore.setCollapse()">
-            <component :is="isCollapse ? 'expand' : 'fold'" />
-        </el-icon>
-    </div>
+  <div class="menu-collapse">
+    <el-icon class="collapse-icon" :size="25" @click="menuStore.setCollapse()">
+      <component :is="isCollapse ? 'expand' : 'fold'" />
+    </el-icon>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -15,18 +15,18 @@ const isCollapse = computed(() => menuStore.isCollapse);
 
 <style scoped lang="scss">
 .menu-collapse {
-    display: flex;
-    align-items: center;
-    box-sizing: border-box;
-    border-top: 1px solid var(--panel-footer-border);
-    height: 48px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  border-top: 1px solid var(--panel-footer-border);
+  height: 48px;
 }
 
 .collapse-icon {
-    margin-left: 25px;
-    &:hover {
-        color: $primary-color;
-        cursor: pointer;
-    }
+  margin-left: 25px;
+  &:hover {
+    color: $primary-color;
+    cursor: pointer;
+  }
 }
 </style>

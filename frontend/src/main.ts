@@ -11,7 +11,7 @@ import 'highlight.js/lib/common';
 
 const styleModule = import.meta.glob('xpack/styles/index.scss');
 for (const path in styleModule) {
-    styleModule[path]?.();
+  styleModule[path]?.();
 }
 
 import directives from '@/directives/index';
@@ -33,7 +33,7 @@ app.use(ElementPlus);
 app.use(Fit2CloudPlus, { locale: i18n.global.messages.value[localStorage.getItem('lang') || 'zh'] });
 
 Object.keys(Icons).forEach((key) => {
-    app.component(key, Icons[key as keyof typeof Icons]);
+  app.component(key, Icons[key as keyof typeof Icons]);
 });
 
 app.use(router);

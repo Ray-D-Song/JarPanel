@@ -12,42 +12,42 @@ import { MsgSuccess } from '@/utils/message';
  * @return Promise
  */
 export const useDeleteData = <P = any, R = any>(
-    api: (params: P) => Promise<R>,
-    params: Parameters<typeof api>[0],
-    message: string,
-    confirmType: HandleData.MessageType = 'error',
+  api: (params: P) => Promise<R>,
+  params: Parameters<typeof api>[0],
+  message: string,
+  confirmType: HandleData.MessageType = 'error',
 ) => {
-    return new Promise((resolve, reject) => {
-        ElMessageBox.confirm(i18n.global.t(`${message}`), i18n.global.t('commons.msg.deleteTitle'), {
-            confirmButtonText: i18n.global.t('commons.button.confirm'),
-            cancelButtonText: i18n.global.t('commons.button.cancel'),
-            closeOnClickModal: false,
-            closeOnPressEscape: false,
-            showClose: false,
-            type: confirmType,
-            draggable: true,
-            beforeClose: async (action, instance, done) => {
-                if (action === 'confirm') {
-                    instance.confirmButtonLoading = true;
-                    instance.cancelButtonLoading = true;
+  return new Promise((resolve, reject) => {
+    ElMessageBox.confirm(i18n.global.t(`${message}`), i18n.global.t('commons.msg.deleteTitle'), {
+      confirmButtonText: i18n.global.t('commons.button.confirm'),
+      cancelButtonText: i18n.global.t('commons.button.cancel'),
+      closeOnClickModal: false,
+      closeOnPressEscape: false,
+      showClose: false,
+      type: confirmType,
+      draggable: true,
+      beforeClose: async (action, instance, done) => {
+        if (action === 'confirm') {
+          instance.confirmButtonLoading = true;
+          instance.cancelButtonLoading = true;
 
-                    await api(params)
-                        .then((res) => {
-                            done();
-                            if (!res) return reject(false);
-                            resolve(true);
-                            MsgSuccess(i18n.global.t('commons.msg.operationSuccess'));
-                        })
-                        .finally(() => {
-                            instance.confirmButtonLoading = false;
-                            instance.cancelButtonLoading = false;
-                        });
-                } else {
-                    done();
-                }
-            },
-        })
-            .then(() => {})
-            .catch(() => {});
-    });
+          await api(params)
+            .then((res) => {
+              done();
+              if (!res) return reject(false);
+              resolve(true);
+              MsgSuccess(i18n.global.t('commons.msg.operationSuccess'));
+            })
+            .finally(() => {
+              instance.confirmButtonLoading = false;
+              instance.cancelButtonLoading = false;
+            });
+        } else {
+          done();
+        }
+      },
+    })
+      .then(() => {})
+      .catch(() => {});
+  });
 };

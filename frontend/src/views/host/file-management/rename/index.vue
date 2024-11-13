@@ -1,34 +1,34 @@
 <template>
-    <el-drawer v-model="open" size="40%" :close-on-click-modal="false" :close-on-press-escape="false">
-        <template #header>
-            <DrawerHeader :header="$t('file.rename')" :resource="oldName" :back="handleClose" />
-        </template>
-        <el-row>
-            <el-col :span="22" :offset="1">
-                <el-form
-                    ref="fileForm"
-                    label-position="top"
-                    :model="addForm"
-                    label-width="100px"
-                    :rules="rules"
-                    v-loading="loading"
-                >
-                    <el-form-item :label="$t('file.path')" prop="path">
-                        <el-input v-model="addForm.path" disabled />
-                    </el-form-item>
-                    <el-form-item :label="$t('commons.table.name')" prop="newName">
-                        <el-input v-model.trim="addForm.newName" />
-                    </el-form-item>
-                </el-form>
-            </el-col>
-        </el-row>
-        <template #footer>
-            <span class="dialog-footer">
-                <el-button @click="handleClose">{{ $t('commons.button.cancel') }}</el-button>
-                <el-button type="primary" @click="submit(fileForm)">{{ $t('commons.button.confirm') }}</el-button>
-            </span>
-        </template>
-    </el-drawer>
+  <el-drawer v-model="open" size="40%" :close-on-click-modal="false" :close-on-press-escape="false">
+    <template #header>
+      <DrawerHeader :header="$t('file.rename')" :resource="oldName" :back="handleClose" />
+    </template>
+    <el-row>
+      <el-col :span="22" :offset="1">
+        <el-form
+          ref="fileForm"
+          label-position="top"
+          :model="addForm"
+          label-width="100px"
+          :rules="rules"
+          v-loading="loading"
+        >
+          <el-form-item :label="$t('file.path')" prop="path">
+            <el-input v-model="addForm.path" disabled />
+          </el-form-item>
+          <el-form-item :label="$t('commons.table.name')" prop="newName">
+            <el-input v-model.trim="addForm.newName" />
+          </el-form-item>
+        </el-form>
+      </el-col>
+    </el-row>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="handleClose">{{ $t('commons.button.cancel') }}</el-button>
+        <el-button type="primary" @click="submit(fileForm)">{{ $t('commons.button.confirm') }}</el-button>
+      </span>
+    </template>
+  </el-drawer>
 </template>
 
 <script lang="ts" setup>
@@ -42,8 +42,8 @@ import { MsgSuccess } from '@/utils/message';
 import DrawerHeader from '@/components/drawer-header/index.vue';
 
 interface RenameProps {
-    path: string;
-    oldName: string;
+  path: string;
+  oldName: string;
 }
 
 const fileForm = ref<FormInstance>();
@@ -52,54 +52,54 @@ const open = ref(false);
 const oldName = ref('');
 
 const addForm = reactive({
-    newName: '',
-    path: '',
+  newName: '',
+  path: '',
 });
 
 const rules = reactive<FormRules>({
-    newName: [Rules.requiredInput],
+  newName: [Rules.requiredInput],
 });
 
 const em = defineEmits(['close']);
 const handleClose = () => {
-    open.value = false;
-    if (fileForm.value) {
-        fileForm.value.resetFields();
-    }
-    em('close', false);
+  open.value = false;
+  if (fileForm.value) {
+    fileForm.value.resetFields();
+  }
+  em('close', false);
 };
 
 const getPath = (path: string, name: string) => {
-    return path + '/' + name;
+  return path + '/' + name;
 };
 const submit = async (formEl: FormInstance | undefined) => {
-    if (!formEl) return;
-    await formEl.validate((valid) => {
-        if (!valid) {
-            return;
-        }
+  if (!formEl) return;
+  await formEl.validate((valid) => {
+    if (!valid) {
+      return;
+    }
 
-        let addItem = {};
-        Object.assign(addItem, addForm);
-        addItem['oldName'] = getPath(addForm.path, oldName.value);
-        addItem['newName'] = getPath(addForm.path, addForm.newName);
-        loading.value = true;
-        RenameRile(addItem as File.FileRename)
-            .then(() => {
-                MsgSuccess(i18n.global.t('commons.msg.updateSuccess'));
-                handleClose();
-            })
-            .finally(() => {
-                loading.value = false;
-            });
-    });
+    let addItem = {};
+    Object.assign(addItem, addForm);
+    addItem['oldName'] = getPath(addForm.path, oldName.value);
+    addItem['newName'] = getPath(addForm.path, addForm.newName);
+    loading.value = true;
+    RenameRile(addItem as File.FileRename)
+      .then(() => {
+        MsgSuccess(i18n.global.t('commons.msg.updateSuccess'));
+        handleClose();
+      })
+      .finally(() => {
+        loading.value = false;
+      });
+  });
 };
 
 const acceptParams = (props: RenameProps) => {
-    oldName.value = props.oldName;
-    addForm.newName = props.oldName;
-    addForm.path = props.path;
-    open.value = true;
+  oldName.value = props.oldName;
+  addForm.newName = props.oldName;
+  addForm.path = props.path;
+  open.value = true;
 };
 
 defineExpose({ acceptParams });

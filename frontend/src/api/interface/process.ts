@@ -1,5 +1,5 @@
 export namespace Process {
-    export interface StopReq {
-        PID: number;
-    }
+  export interface StopReq {
+    PID: number;
+  }
 }

@@ -10,16 +10,16 @@ import Tooltip from '@/components/tooltip/index.vue';
 import CopyButton from '@/components/copy-button/index.vue';
 import MsgInfo from '@/components/msg-info/index.vue';
 export default {
-    install(app: App) {
-        app.component(LayoutContent.name, LayoutContent);
-        app.component(RouterButton.name, RouterButton);
-        app.component(ComplexTable.name, ComplexTable);
-        app.component(ErrPrompt.name, ErrPrompt);
-        app.component(OpDialog.name, OpDialog);
-        app.component(Tooltip.name, Tooltip);
-        app.component(CopyButton.name, CopyButton);
-        app.component(TableSearch.name, TableSearch);
-        app.component(TableSetting.name, TableSetting);
-        app.component(MsgInfo.name, MsgInfo);
-    },
+  install(app: App) {
+    app.component(LayoutContent.name, LayoutContent);
+    app.component(RouterButton.name, RouterButton);
+    app.component(ComplexTable.name, ComplexTable);
+    app.component(ErrPrompt.name, ErrPrompt);
+    app.component(OpDialog.name, OpDialog);
+    app.component(Tooltip.name, Tooltip);
+    app.component(CopyButton.name, CopyButton);
+    app.component(TableSearch.name, TableSearch);
+    app.component(TableSetting.name, TableSetting);
+    app.component(MsgInfo.name, MsgInfo);
+  },
 };

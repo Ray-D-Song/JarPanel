@@ -1,37 +1,37 @@
 <template>
-    <div
-        class="sidebar-container"
-        element-loading-text="Loading..."
-        :element-loading-spinner="loadingSvg"
-        element-loading-svg-view-box="-10, -10, 50, 50"
-        element-loading-background="rgba(122, 122, 122, 0.01)"
-    >
-        <div class="fixed">
-            <PrimaryMenu />
-        </div>
-        <Logo :isCollapse="isCollapse" />
-        <el-scrollbar>
-            <el-menu
-                :default-active="activeMenu"
-                :router="menuRouter"
-                :collapse="isCollapse"
-                :collapse-transition="false"
-                :unique-opened="true"
-                @select="handleMenuClick"
-            >
-                <SubItem :menuList="routerMenus" />
-                <el-menu-item :index="''">
-                    <el-icon @click="logout">
-                        <SvgIcon :iconName="'p-logout'" />
-                    </el-icon>
-                    <template #title>
-                        <span @click="logout">{{ $t('commons.login.logout') }}</span>
-                    </template>
-                </el-menu-item>
-            </el-menu>
-        </el-scrollbar>
-        <Collapse />
+  <div
+    class="sidebar-container"
+    element-loading-text="Loading..."
+    :element-loading-spinner="loadingSvg"
+    element-loading-svg-view-box="-10, -10, 50, 50"
+    element-loading-background="rgba(122, 122, 122, 0.01)"
+  >
+    <div class="fixed">
+      <PrimaryMenu />
     </div>
+    <Logo :isCollapse="isCollapse" />
+    <el-scrollbar>
+      <el-menu
+        :default-active="activeMenu"
+        :router="menuRouter"
+        :collapse="isCollapse"
+        :collapse-transition="false"
+        :unique-opened="true"
+        @select="handleMenuClick"
+      >
+        <SubItem :menuList="routerMenus" />
+        <el-menu-item :index="''">
+          <el-icon @click="logout">
+            <SvgIcon :iconName="'p-logout'" />
+          </el-icon>
+          <template #title>
+            <span @click="logout">{{ $t('commons.login.logout') }}</span>
+          </template>
+        </el-menu-item>
+      </el-menu>
+    </el-scrollbar>
+    <Collapse />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -55,127 +55,127 @@ const route = useRoute();
 const menuStore = MenuStore();
 const globalStore = GlobalStore();
 defineProps({
-    menuRouter: {
-        type: Boolean,
-        default: true,
-        required: false,
-    },
+  menuRouter: {
+    type: Boolean,
+    default: true,
+    required: false,
+  },
 });
 const activeMenu = computed(() => {
-    const { meta, path } = route;
-    return isString(meta.activeMenu) ? meta.activeMenu : path;
+  const { meta, path } = route;
+  return isString(meta.activeMenu) ? meta.activeMenu : path;
 });
 const isCollapse = computed((): boolean => menuStore.isCollapse);
 
 let routerMenus = computed((): RouteRecordRaw[] => {
-    return menuStore.menuList.filter((route) => route.meta && !route.meta.hideInSidebar);
+  return menuStore.menuList.filter((route) => route.meta && !route.meta.hideInSidebar);
 });
 
 const screenWidth = ref(0);
 
 interface Node {
-    id: string;
-    title: string;
-    path?: string;
-    label: string;
-    isCheck: boolean;
-    children?: Node[];
+  id: string;
+  title: string;
+  path?: string;
+  label: string;
+  isCheck: boolean;
+  children?: Node[];
 }
 const listeningWindow = () => {
-    window.onresize = () => {
-        return (() => {
-            screenWidth.value = document.body.clientWidth;
-            if (!isCollapse.value && screenWidth.value < 1200) menuStore.setCollapse();
-            if (isCollapse.value && screenWidth.value > 1200) menuStore.setCollapse();
-        })();
-    };
+  window.onresize = () => {
+    return (() => {
+      screenWidth.value = document.body.clientWidth;
+      if (!isCollapse.value && screenWidth.value < 1200) menuStore.setCollapse();
+      if (isCollapse.value && screenWidth.value > 1200) menuStore.setCollapse();
+    })();
+  };
 };
 listeningWindow();
 const emit = defineEmits(['menuClick']);
 const handleMenuClick = (path) => {
-    emit('menuClick', path);
+  emit('menuClick', path);
 };
 const logout = () => {
-    ElMessageBox.confirm(i18n.global.t('commons.msg.sureLogOut'), i18n.global.t('commons.msg.infoTitle'), {
-        confirmButtonText: i18n.global.t('commons.button.confirm'),
-        cancelButtonText: i18n.global.t('commons.button.cancel'),
-        type: 'warning',
+  ElMessageBox.confirm(i18n.global.t('commons.msg.sureLogOut'), i18n.global.t('commons.msg.infoTitle'), {
+    confirmButtonText: i18n.global.t('commons.button.confirm'),
+    cancelButtonText: i18n.global.t('commons.button.cancel'),
+    type: 'warning',
+  })
+    .then(() => {
+      systemLogOut();
+      router.push({ name: 'entrance', params: { code: globalStore.entrance } });
+      globalStore.setLogStatus(false);
+      MsgSuccess(i18n.global.t('commons.msg.operationSuccess'));
     })
-        .then(() => {
-            systemLogOut();
-            router.push({ name: 'entrance', params: { code: globalStore.entrance } });
-            globalStore.setLogStatus(false);
-            MsgSuccess(i18n.global.t('commons.msg.operationSuccess'));
-        })
-        .catch(() => {});
+    .catch(() => {});
 };
 
 const systemLogOut = async () => {
-    await logOutApi();
+  await logOutApi();
 };
 
 function extractLabels(node: Node, result: string[]): void {
-    if (node.isCheck) {
-        result.push(node.label);
+  if (node.isCheck) {
+    result.push(node.label);
+  }
+  if (node.children) {
+    for (const childNode of node.children) {
+      extractLabels(childNode, result);
     }
-    if (node.children) {
-        for (const childNode of node.children) {
-            extractLabels(childNode, result);
-        }
-    }
+  }
 }
 
 function getCheckedLabels(json: Node): string[] {
-    let result: string[] = [];
-    extractLabels(json, result);
-    return result;
+  let result: string[] = [];
+  extractLabels(json, result);
+  return result;
 }
 
 const search = async () => {
-    const res = await getSettingInfo();
-    const json: Node = JSON.parse(res.data.xpackHideMenu);
-    const checkedLabels = getCheckedLabels(json);
-    let rstMenuList: RouteRecordRaw[] = [];
-    menuStore.menuList.forEach((item) => {
-        let menuItem = JSON.parse(JSON.stringify(item));
-        let menuChildren: RouteRecordRaw[] = [];
-        if (menuItem.path === '/xpack') {
-            if (checkedLabels.length) {
-                menuItem.children.forEach((child: any) => {
-                    for (const str of checkedLabels) {
-                        if (child.name === str) {
-                            child.hidden = false;
-                        }
-                    }
-                    if (child.hidden === false) {
-                        menuChildren.push(child);
-                        if (checkedLabels.length === 2) {
-                            menuItem.meta.title = child.meta.title;
-                        } else {
-                            menuItem.meta.title = 'xpack.menu';
-                        }
-                    }
-                });
-                menuItem.meta.hideInSidebar = false;
+  const res = await getSettingInfo();
+  const json: Node = JSON.parse(res.data.xpackHideMenu);
+  const checkedLabels = getCheckedLabels(json);
+  let rstMenuList: RouteRecordRaw[] = [];
+  menuStore.menuList.forEach((item) => {
+    let menuItem = JSON.parse(JSON.stringify(item));
+    let menuChildren: RouteRecordRaw[] = [];
+    if (menuItem.path === '/xpack') {
+      if (checkedLabels.length) {
+        menuItem.children.forEach((child: any) => {
+          for (const str of checkedLabels) {
+            if (child.name === str) {
+              child.hidden = false;
             }
-            menuItem.children = menuChildren as RouteRecordRaw[];
-            rstMenuList.push(menuItem);
-        } else {
-            menuItem.children.forEach((child: any) => {
-                if (child.hidden == undefined || child.hidden == false) {
-                    menuChildren.push(child);
-                }
-            });
-            menuItem.children = menuChildren as RouteRecordRaw[];
-            rstMenuList.push(menuItem);
+          }
+          if (child.hidden === false) {
+            menuChildren.push(child);
+            if (checkedLabels.length === 2) {
+              menuItem.meta.title = child.meta.title;
+            } else {
+              menuItem.meta.title = 'xpack.menu';
+            }
+          }
+        });
+        menuItem.meta.hideInSidebar = false;
+      }
+      menuItem.children = menuChildren as RouteRecordRaw[];
+      rstMenuList.push(menuItem);
+    } else {
+      menuItem.children.forEach((child: any) => {
+        if (child.hidden == undefined || child.hidden == false) {
+          menuChildren.push(child);
         }
-    });
-    menuStore.menuList = rstMenuList;
+      });
+      menuItem.children = menuChildren as RouteRecordRaw[];
+      rstMenuList.push(menuItem);
+    }
+  });
+  menuStore.menuList = rstMenuList;
 };
 
 onMounted(() => {
-    menuStore.setMenuList(menuList);
-    search();
+  menuStore.setMenuList(menuList);
+  search();
 });
 </script>
 
@@ -183,19 +183,19 @@ onMounted(() => {
 @import './index.scss';
 
 .sidebar-container {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    background: var(--panel-menu-bg-color) no-repeat top;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--panel-menu-bg-color) no-repeat top;
 
-    .el-scrollbar {
-        flex: 1;
-        .el-menu {
-            overflow: auto;
-            overflow-x: hidden;
-            border-right: none;
-        }
+  .el-scrollbar {
+    flex: 1;
+    .el-menu {
+      overflow: auto;
+      overflow-x: hidden;
+      border-right: none;
     }
+  }
 }
 </style>
