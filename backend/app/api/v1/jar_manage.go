@@ -2,6 +2,9 @@ package v1
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -9,7 +12,6 @@ import (
 	"time"
 
 	"github.com/1Panel-dev/1Panel/backend/app/api/v1/helper"
-	"github.com/1Panel-dev/1Panel/backend/app/service"
 	"github.com/1Panel-dev/1Panel/backend/constant"
 	"github.com/1Panel-dev/1Panel/backend/global"
 	"github.com/gin-gonic/gin"
@@ -34,24 +36,18 @@ func init() {
 	}
 }
 
-type JarRecord struct {
-	Id         string `json:"id"`
-	Name       string `json:"name"`
-	FileName   string `json:"fileName"`
-	CreateTime string `json:"createTime"`
+type ServiceRecord struct {
+	Id              string `json:"id"`
+	Name            string `json:"name"`
+	PrefixArgs      string `json:"prefixArgs"`
+	SuffixArgs      string `json:"suffixArgs"`
+	CreateTime      string `json:"createTime"`
+	DeployTime      string `json:"deployTime"`
+	CurrentVersion  string `json:"currentVersion"`
+	PreviousVersion string `json:"previousVersion"`
 }
 
-// @Tags Jar
-// @Summary Upload jar
-// @Description 上传jar包
-// @Accept multipart/form-data
-// @Param file formData file true "jar包文件"
-// @Param name formData string true "应用名称"
-// @Success 200
-// @Security ApiKeyAuth
-// @Router /jars/upload [post]
-// @x-panel-log {"bodyKeys":["name"],"paramKeys":[],"BeforeFunctions":[],"formatZH":"上传jar包 [name]","formatEN":"Upload jar [name]"}
-func (b *BaseApi) UploadJar(c *gin.Context) {
+func (b *BaseApi) NewService(c *gin.Context) {
 	file, err := c.FormFile("file")
 	if err != nil {
 		helper.ErrorWithDetail(c, constant.CodeErrBadRequest, constant.ErrTypeInvalidParams, err)
@@ -68,9 +64,19 @@ func (b *BaseApi) UploadJar(c *gin.Context) {
 		return
 	}
 
-	jarService := service.NewJarService()
-	fileName, err := jarService.Upload(file)
-	if err != nil {
+	// 创建新的服务文件夹
+	newDirName := uuid.New().String()
+	newDirPath := filepath.Join(jarDir, newDirName)
+	if err := os.MkdirAll(newDirPath, 0755); err != nil {
+		helper.ErrorWithDetail(c, constant.CodeErrInternalServer, constant.ErrTypeInternalServer, err)
+		return
+	}
+
+	// jar 包命名为类似于 2024-01-01-12-00.jar
+	jarFileName := time.Now().Format("2006-01-02-15-00") + ".jar"
+	// 将 jar 包写入新的服务文件夹
+	jarFilePath := filepath.Join(newDirPath, jarFileName)
+	if err := c.SaveUploadedFile(file, jarFilePath); err != nil {
 		helper.ErrorWithDetail(c, constant.CodeErrInternalServer, constant.ErrTypeInternalServer, err)
 		return
 	}
@@ -83,18 +89,22 @@ func (b *BaseApi) UploadJar(c *gin.Context) {
 	}
 
 	// 解析 record.json 文件
-	var recordData []JarRecord
+	var recordData []ServiceRecord
 	if err := json.Unmarshal(record, &recordData); err != nil {
 		helper.ErrorWithDetail(c, constant.CodeErrInternalServer, constant.ErrTypeInternalServer, err)
 		return
 	}
 
 	// 添加新记录
-	recordData = append(recordData, JarRecord{
-		Id:         uuid.New().String(),
-		Name:       name,
-		FileName:   fileName,
-		CreateTime: time.Now().Format("2006-01-02 15:04:05"),
+	recordData = append(recordData, ServiceRecord{
+		Id:              newDirName,
+		Name:            name,
+		PrefixArgs:      "",
+		SuffixArgs:      "",
+		CreateTime:      time.Now().Format("2006-01-02 15:04:05"),
+		DeployTime:      "",
+		CurrentVersion:  jarFileName,
+		PreviousVersion: "",
 	})
 
 	// 写入 record.json 文件
@@ -121,7 +131,7 @@ func (b *BaseApi) UploadJar(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /jars/start [post]
 // @x-panel-log {"bodyKeys":["name"],"paramKeys":[],"BeforeFunctions":[],"formatZH":"启动jar包 [name]","formatEN":"Start jar [name]"}
-func (b *BaseApi) StartJar(c *gin.Context) {
+func (b *BaseApi) StartService(c *gin.Context) {
 	id := c.Query("id")
 	if id == "" {
 		helper.ErrorWithDetail(c, constant.CodeErrBadRequest, constant.ErrTypeInvalidParams, nil)
@@ -134,7 +144,7 @@ func (b *BaseApi) StartJar(c *gin.Context) {
 		return
 	}
 
-	var recordData []JarRecord
+	var recordData []ServiceRecord
 	if err := json.Unmarshal(records, &recordData); err != nil {
 		helper.ErrorWithDetail(c, constant.CodeErrInternalServer, constant.ErrTypeInternalServer, err)
 		return
@@ -142,10 +152,11 @@ func (b *BaseApi) StartJar(c *gin.Context) {
 	// 找到对应的jar包
 	for _, record := range recordData {
 		if record.Id == id {
-			// 修改启动命令，将输出重定向到日志文件
-			logFile := filepath.Join(jarDir, record.FileName+".log")
-			cmd := exec.Command("java", "-jar", filepath.Join(jarDir, record.FileName))
-			cmd.Stdout, _ = os.Create(logFile)
+			// 进入jar包目录
+			jarDirPath := filepath.Join(jarDir, record.Id)
+			// 组合启动命令
+			command := fmt.Sprintf("cd %s && java -jar %s %s %s", jarDirPath, record.CurrentVersion, record.PrefixArgs, record.SuffixArgs)
+			cmd := exec.Command("sh", "-c", command)
 			cmd.Stderr = cmd.Stdout
 
 			// 以后台方式启动进程
@@ -175,7 +186,7 @@ func (b *BaseApi) StartJar(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /jars/stop [post]
 // @x-panel-log {"bodyKeys":["name"],"paramKeys":[],"BeforeFunctions":[],"formatZH":"停止jar包 [name]","formatEN":"Stop jar [name]"}
-func (b *BaseApi) StopJar(c *gin.Context) {
+func (b *BaseApi) StopService(c *gin.Context) {
 	id := c.Query("id")
 	if id == "" {
 		helper.ErrorWithDetail(c, constant.CodeErrBadRequest, constant.ErrTypeInvalidParams, nil)
@@ -189,7 +200,7 @@ func (b *BaseApi) StopJar(c *gin.Context) {
 		return
 	}
 
-	var recordData []JarRecord
+	var recordData []ServiceRecord
 	if err := json.Unmarshal(records, &recordData); err != nil {
 		helper.ErrorWithDetail(c, constant.CodeErrInternalServer, constant.ErrTypeInternalServer, err)
 		return
@@ -207,7 +218,7 @@ func (b *BaseApi) StopJar(c *gin.Context) {
 			// 在输出中查找对应的 jar 包进程
 			lines := strings.Split(string(output), "\n")
 			for _, line := range lines {
-				if strings.Contains(line, record.FileName) {
+				if strings.Contains(line, record.CurrentVersion) {
 					// 提取 PID
 					pid := strings.Split(line, " ")[0]
 					// 先尝试优雅停止
@@ -241,73 +252,27 @@ func (b *BaseApi) StopJar(c *gin.Context) {
 	helper.SuccessWithData(c, nil)
 }
 
-// @Tags Jar
-// @Summary Delete jar
-// @Description 删除jar包
-// @Accept json
-// @Param request body request.JarDelete true "request"
-// @Success 200
-// @Security ApiKeyAuth
-// @Router /jars/delete [post]
-// @x-panel-log {"bodyKeys":["name"],"paramKeys":[],"BeforeFunctions":[],"formatZH":"删除jar包 [name]","formatEN":"Delete jar [name]"}
-func (b *BaseApi) DeleteJar(c *gin.Context) {
-	id := c.Query("id")
-	if id == "" {
-		helper.ErrorWithDetail(c, constant.CodeErrBadRequest, constant.ErrTypeInvalidParams, nil)
-		return
-	}
-
-	// 读取 record.json 文件
-	records, err := os.ReadFile(filepath.Join(jarDir, "record.json"))
-	if err != nil {
-		helper.ErrorWithDetail(c, constant.CodeErrInternalServer, constant.ErrTypeInternalServer, err)
-		return
-	}
-
-	var recordData []JarRecord
-	if err := json.Unmarshal(records, &recordData); err != nil {
-		helper.ErrorWithDetail(c, constant.CodeErrInternalServer, constant.ErrTypeInternalServer, err)
-		return
-	}
-
-	// 修改 record.json, 无需删除 jar 包
-	for i, record := range recordData {
-		if record.Id == id {
-			recordData = append(recordData[:i], recordData[i+1:]...)
-			break
-		}
-	}
-
-	recordBytes, err := json.Marshal(recordData)
-	if err != nil {
-		helper.ErrorWithDetail(c, constant.CodeErrInternalServer, constant.ErrTypeInternalServer, err)
-		return
-	}
-	if err := os.WriteFile(filepath.Join(jarDir, "record.json"), recordBytes, 0644); err != nil {
-		helper.ErrorWithDetail(c, constant.CodeErrInternalServer, constant.ErrTypeInternalServer, err)
-		return
-	}
-
-	helper.SuccessWithData(c, nil)
-}
-
-type JarStatus struct {
-	Id         string `json:"id"`
-	Name       string `json:"name"`
-	FileName   string `json:"fileName"`
-	CreateTime string `json:"createTime"`
-	Status     string `json:"status"`
+type ServiceStatus struct {
+	Id              string `json:"id"`
+	Name            string `json:"name"`
+	PrefixArgs      string `json:"prefixArgs"`
+	SuffixArgs      string `json:"suffixArgs"`
+	CreateTime      string `json:"createTime"`
+	DeployTime      string `json:"deployTime"`
+	Status          string `json:"status"`
+	CurrentVersion  string `json:"currentVersion"`
+	PreviousVersion string `json:"previousVersion"`
 }
 
 // @Tags Jar
 // @Summary Get jar status
 // @Description 获取jar包运行状态
 // @Accept json
-// @Success 200 {object} JarStatus
+// @Success 200 {object} ServiceStatus
 // @Security ApiKeyAuth
 // @Router /jars/status [post]
 // @x-panel-log {"bodyKeys":[],"paramKeys":[],"BeforeFunctions":[],"formatZH":"获取jar包状态","formatEN":"Get jar status"}
-func (b *BaseApi) GetJarStatus(c *gin.Context) {
+func (b *BaseApi) GetServiceStatus(c *gin.Context) {
 	// 从record.json中获取jar包信息
 	records, err := os.ReadFile(filepath.Join(jarDir, "record.json"))
 	if err != nil {
@@ -315,7 +280,7 @@ func (b *BaseApi) GetJarStatus(c *gin.Context) {
 		return
 	}
 
-	var recordData []JarRecord
+	var recordData []ServiceRecord
 	if err := json.Unmarshal(records, &recordData); err != nil {
 		helper.ErrorWithDetail(c, constant.CodeErrInternalServer, constant.ErrTypeInternalServer, err)
 		return
@@ -331,14 +296,94 @@ func (b *BaseApi) GetJarStatus(c *gin.Context) {
 	os.WriteFile(filepath.Join(jarDir, "dev.log"), output, 0644)
 
 	// 遍历recordData，检查每个jar包是否在运行, 返回Record + Running状态
-	var statuses []JarStatus
+	var statuses []ServiceStatus
 	for _, record := range recordData {
-		if strings.Contains(string(output), record.FileName) {
-			statuses = append(statuses, JarStatus{Id: record.Id, Name: record.Name, FileName: record.FileName, CreateTime: record.CreateTime, Status: "running"})
+		if strings.Contains(string(output), record.CurrentVersion) {
+			statuses = append(statuses, ServiceStatus{Id: record.Id, Name: record.Name, PrefixArgs: record.PrefixArgs, SuffixArgs: record.SuffixArgs, CreateTime: record.CreateTime, DeployTime: record.DeployTime, Status: "running", CurrentVersion: record.CurrentVersion, PreviousVersion: record.PreviousVersion})
 		} else {
-			statuses = append(statuses, JarStatus{Id: record.Id, Name: record.Name, FileName: record.FileName, CreateTime: record.CreateTime, Status: "stopped"})
+			statuses = append(statuses, ServiceStatus{Id: record.Id, Name: record.Name, PrefixArgs: record.PrefixArgs, SuffixArgs: record.SuffixArgs, CreateTime: record.CreateTime, DeployTime: record.DeployTime, Status: "stopped", CurrentVersion: record.CurrentVersion, PreviousVersion: record.PreviousVersion})
 		}
 	}
 
 	helper.SuccessWithData(c, statuses)
+}
+
+// @Tags Jar
+// @Summary Get jar files
+// @Description 获取jar包文件列表
+// @Accept json
+// @Success 200 {array} string
+// @Security ApiKeyAuth
+// @Router /jars/files [get]
+func (b *BaseApi) GetServiceFileList(c *gin.Context) {
+	id := c.Query("id")
+	serviceDirPath := filepath.Join(jarDir, id)
+	files, err := os.ReadDir(serviceDirPath)
+	if err != nil {
+		helper.ErrorWithDetail(c, constant.CodeErrInternalServer, constant.ErrTypeInternalServer, err)
+	}
+	var fileList []string
+	for _, file := range files {
+		fileList = append(fileList, file.Name())
+	}
+	helper.SuccessWithData(c, fileList)
+}
+
+// @Tags Jar
+// @Summary Download jar file
+// @Description 下载jar包文件
+// @Accept json
+// @Success 200
+// @Security ApiKeyAuth
+// @Router /jars/download [get]
+func (b *BaseApi) DownloadFile(c *gin.Context) {
+	id := c.Query("id")
+	name := c.Query("name")
+	filePath := filepath.Join(jarDir, id, name)
+	// 获取文件
+	file, err := os.ReadFile(filePath)
+	if err != nil {
+		helper.ErrorWithDetail(c, constant.CodeErrInternalServer, constant.ErrTypeInternalServer, err)
+		return
+	}
+	c.Data(http.StatusOK, "application/octet-stream", file)
+}
+
+func (b *BaseApi) UploadFile(c *gin.Context) {
+	id := c.Query("id")
+	name := c.Query("name")
+	if id == "" || name == "" {
+		helper.ErrorWithDetail(c, constant.CodeErrBadRequest, constant.ErrTypeInvalidParams, nil)
+		return
+	}
+	// 如果是 .jar 文件，则按照日期命名
+	if filepath.Ext(name) == ".jar" {
+		name = time.Now().Format("2006-01-02-15-00") + ".jar"
+	}
+	filePath := filepath.Join(jarDir, id, name)
+	file, err := c.FormFile("file")
+	if err != nil {
+		helper.ErrorWithDetail(c, constant.CodeErrBadRequest, constant.ErrTypeInvalidParams, err)
+		return
+	}
+
+	dst, err := os.Create(filePath)
+	if err != nil {
+		helper.ErrorWithDetail(c, constant.CodeErrInternalServer, constant.ErrTypeInternalServer, err)
+		return
+	}
+	defer dst.Close()
+
+	src, err := file.Open()
+	if err != nil {
+		helper.ErrorWithDetail(c, constant.CodeErrInternalServer, constant.ErrTypeInternalServer, err)
+		return
+	}
+	defer src.Close()
+
+	if _, err := io.Copy(dst, src); err != nil {
+		helper.ErrorWithDetail(c, constant.CodeErrInternalServer, constant.ErrTypeInternalServer, err)
+		return
+	}
+	helper.SuccessWithData(c, nil)
 }

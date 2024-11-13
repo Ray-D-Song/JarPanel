@@ -26,25 +26,6 @@
                 </el-input>
               </el-form-item>
 
-              <el-form-item :label="$t('setting.theme')" prop="theme">
-                <div class="flex justify-between items-center gap-6">
-                  <el-radio-group @change="onSave('Theme', form.theme)" v-model="form.theme">
-                    <el-radio-button value="light">
-                      <span>{{ $t('setting.light') }}</span>
-                    </el-radio-button>
-                    <el-radio-button value="dark">
-                      <span>{{ $t('setting.dark') }}</span>
-                    </el-radio-button>
-                    <el-radio-button value="auto">
-                      <span>{{ $t('setting.auto') }}</span>
-                    </el-radio-button>
-                  </el-radio-group>
-                  <el-button v-if="isProductPro" @click="onChangeThemeColor" icon="Setting" class="!h-[34px]">
-                    <span>{{ $t('container.custom') }}</span>
-                  </el-button>
-                </div>
-              </el-form-item>
-
               <el-form-item :label="$t('setting.menuTabs')" prop="menuTabs">
                 <el-radio-group @change="onSave('MenuTabs', form.menuTabs)" v-model="form.menuTabs">
                   <el-radio-button value="enable">

@@ -30,3 +30,11 @@ export const startJar = (id: string) => {
 export const stopJar = (id: string) => {
   return http.put<void>(`/jar/stop?id=${id}`);
 };
+
+/**
+ * 获取 JAR 包文件列表
+ * @param id JAR 包 ID
+ */
+export const getServiceFileList = (id: string) => {
+  return http.get<string[]>(`/jar/files?id=${id}`);
+};

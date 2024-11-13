@@ -7,6 +7,7 @@ import viteCompression from 'vite-plugin-compression';
 import VueSetupExtend from 'vite-plugin-vue-setup-extend';
 import vueJsx from '@vitejs/plugin-vue-jsx';
 import DefineOptions from 'unplugin-vue-define-options/vite';
+import Inspect from 'vite-plugin-inspect'
 
 import AutoImport from 'unplugin-auto-import/vite';
 import Components from 'unplugin-vue-components/vite';
@@ -30,6 +31,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
         css: {
             preprocessorOptions: {
                 scss: {
+                    api: 'modern-compiler',
                     additionalData: `@use "@/styles/var.scss" as *;`,
                 },
             },
@@ -51,6 +53,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
             DefineOptions(),
             vueJsx(),
             VueSetupExtend(),
+            Inspect(),
             viteEnv.VITE_REPORT && visualizer(),
             viteEnv.VITE_BUILD_GZIP &&
                 viteCompression({
@@ -63,14 +66,14 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
             AutoImport({
                 resolvers: [
                     ElementPlusResolver({
-                        importStyle: 'sass',
+                        importStyle: 'css',
                     }),
                 ],
             }),
             Components({
                 resolvers: [
                     ElementPlusResolver({
-                        importStyle: 'sass',
+                        importStyle: 'css',
                     }),
                 ],
             }),
